@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="حاسبة تكاليف الإنتاج، سجل المبيعات، وإرسال طلبات واتساب">
+    <title>تطبيق مُسَيّر - SmartFlow</title>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icon.svg">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #334155;
+            --accent: #10b981;
+            --accent-hover: #059669;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border: #475569;
+            --danger: #ef4444;
+            --whatsapp: #25d366;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            padding-bottom: 80px;
+            min-height: 100vh;
+        }
+
+        .header {
+            background-color: var(--bg-card);
+            padding: 16px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 1.3rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .install-btn {
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            transform: translateY(-50%);
+            background: var(--bg-input);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            border-radius: 8px;
+            padding: 7px 10px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .install-btn:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px 15px;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group { margin-bottom: 12px; }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-bottom: 6px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        input[type="number"] { direction: ltr; text-align: right; }
+
+        input:focus, textarea:focus { border-color: var(--accent); }
+        input[readonly] { opacity: 0.7; }
+
+        .row { display: flex; gap: 10px; }
+        .row .form-group { flex: 1; min-width: 0; }
+
+        .btn {
+            background-color: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn:hover { background-color: var(--accent-hover); }
+
+        .btn-danger {
+            background-color: var(--danger);
+            padding: 8px 12px;
+            width: auto;
+            flex-shrink: 0;
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-input);
+            margin-bottom: 15px;
+        }
+
+        .btn-whatsapp { background-color: var(--whatsapp); }
+
+        .btn-small {
+            width: auto;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            margin-top: 6px;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border);
+        }
+
+        .item-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        .item-row .ing-name { flex: 2; min-width: 0; }
+        .item-row .ing-cost { flex: 1; min-width: 0; }
+
+        .summary-box {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .summary-item.total {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--accent);
+            border-top: 1px dashed var(--border);
+            padding-top: 8px;
+        }
+
+        .hint {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-top: 4px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-card);
+            display: flex;
+            border-top: 1px solid var(--border);
+            z-index: 100;
+        }
+
+        .nav-item {
+            flex: 1;
+            padding: 12px 0;
+            text-align: center;
+            color: var(--text-sub);
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+        }
+
+        .nav-item i { font-size: 1.2rem; }
+        .nav-item.active { color: var(--accent); }
+        .nav-item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+        .history-item {
+            background-color: var(--bg-input);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-item .info { min-width: 0; overflow-wrap: anywhere; }
+
+        .empty-msg {
+            text-align: center;
+            color: var(--text-sub);
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+
+        .undo-banner {
+            position: fixed;
+            bottom: 80px;
+            left: 15px;
+            right: 15px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            z-index: 200;
+            animation: slideUp 0.25s ease;
+        }
+
+        .undo-banner span {
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .undo-banner button {
+            background-color: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .undo-banner button:hover { background-color: var(--accent-hover); }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to   { transform: translateY(0);    opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1><i class="fa-solid fa-chart-line"></i> تطبيق مُسَيّر - SmartFlow</h1>
+        <button type="button" id="install-btn" class="install-btn" style="display:none;">
+            <i class="fa-solid fa-download"></i>
+            <span>تثبيت</span>
+        </button>
+    </div>
+
+    <div class="container">
+
+        <!-- Tab 1: Cost Calculator -->
+        <div id="tab-calculator" class="tab-content active">
+            <div class="card">
+                <div class="card-title"><i class="fa-solid fa-calculator"></i> حاسبة تكلفة الإنتاج والربح</div>
+
+                <div class="form-group">
+                    <label for="product-name">اسم المنتج أو الدفعة</label>
+                    <input type="text" id="product-name" placeholder="مثال: منتج مخصص / دفعة تسمين">
+                </div>
+
+                <label>المواد الأولية والتكاليف:</label>
+                <div id="ingredients-list"></div>
+
+                <button type="button" class="btn btn-secondary" id="add-ingredient-btn">
+                    <i class="fa-solid fa-plus"></i> إضافة مادة أخرى
+                </button>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label for="extra-cost">مصاريف إضافية (نقل، عمل)</label>
+                        <input type="number" id="extra-cost" value="0" min="0" step="any">
+                    </div>
+                    <div class="form-group">
+                        <label for="profit-margin">نسبة الربح من سعر البيع (%)</label>
+                        <input type="number" id="profit-margin" value="20" min="0" max="99" step="any">
+                    </div>
+                </div>
+                <div class="hint">النسبة تُحسب من سعر البيع: السعر = التكلفة ÷ (1 − النسبة)</div>
+
+                <button type="button" class="btn" id="calc-btn" style="margin-top:12px;">
+                    <i class="fa-solid fa-arrows-rotate"></i> احسب التكلفة والسعر المقترح
+                </button>
+
+                <div class="summary-box" id="calc-result" style="display: none;">
+                    <div class="summary-item">
+                        <span>إجمالي تكلفة الإنتاج:</span>
+                        <span id="res-cost">0.00 د.ج</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>هامش الربح الصافي:</span>
+                        <span id="res-profit">0.00 د.ج</span>
+                    </div>
+                    <div class="summary-item total">
+                        <span>سعر البيع المقترح:</span>
+                        <span id="res-price">0.00 د.ج</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Sales Ledger -->
+        <div id="tab-sales" class="tab-content">
+            <div class="card">
+                <div class="card-title"><i class="fa-solid fa-cart-plus"></i> تسجيل عملية بيع جديدة</div>
+
+                <div class="form-group">
+                    <label for="sale-client">اسم الزبون / الطلب</label>
+                    <input type="text" id="sale-client" placeholder="اسم الزبون">
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="sale-amount">سعر البيع الإجمالي (د.ج)</label>
+                        <input type="number" id="sale-amount" placeholder="0" min="0" step="any">
+                    </div>
+                    <div class="form-group">
+                        <label for="sale-cost">تكلفة هذه البيعة (د.ج)</label>
+                        <input type="number" id="sale-cost" placeholder="0" min="0" step="any">
+                        <button type="button" class="btn btn-small" id="use-calc-cost-btn">استخدام تكلفة الحاسبة</button>
+                    </div>
+                </div>
+                <div class="hint" id="sale-profit-preview">الربح الصافي: 0.00 د.ج</div>
+
+                <button type="button" class="btn" id="save-sale-btn" style="margin-top:12px;">
+                    <i class="fa-solid fa-check"></i> حفظ البيعة
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fa-solid fa-receipt"></i> سجل المبيعات</div>
+                <div id="sales-summary"></div>
+                <div id="sales-history"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fa-solid fa-download"></i> النسخ الاحتياطي</div>
+                <div class="row">
+                    <button type="button" class="btn btn-secondary" id="export-btn">
+                        <i class="fa-solid fa-file-export"></i> تصدير البيانات
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="import-btn">
+                        <i class="fa-solid fa-file-import"></i> استيراد البيانات
+                    </button>
+                </div>
+                <input type="file" id="import-file" accept=".json,application/json" style="display:none">
+            </div>
+        </div>
+
+        <!-- Tab 3: WhatsApp Dispatch -->
+        <div id="tab-whatsapp" class="tab-content">
+            <div class="card">
+                <div class="card-title"><i class="fa-brands fa-whatsapp"></i> إرسال طلب عبر الواتساب</div>
+
+                <div class="form-group">
+                    <label for="wa-number">رقم هاتف الزبون</label>
+                    <input type="tel" id="wa-number" placeholder="213XXXXXXXXX أو 0XXXXXXXXX">
+                    <div class="hint">يمكن كتابة الرقم بالصيغة الدولية أو بالصفر الأول، وسيُحوَّل تلقائياً إلى 213</div>
+                </div>
+                <div class="form-group">
+                    <label for="wa-message">تفاصيل الطلبية أو الملاحظات</label>
+                    <textarea id="wa-message" style="height:80px;" placeholder="أكتب تفاصيل السلعة، السعر، والعنوان..."></textarea>
+                </div>
+                <button type="button" class="btn btn-whatsapp" id="wa-send-btn">
+                    <i class="fa-brands fa-whatsapp"></i> فتح المحادثة والإرسال
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <button type="button" class="nav-item" data-tab="calculator">
+            <i class="fa-solid fa-calculator"></i>
+            <span>الحاسبة</span>
+        </button>
+        <button type="button" class="nav-item" data-tab="sales">
+            <i class="fa-solid fa-list-check"></i>
+            <span>المبيعات</span>
+        </button>
+        <button type="button" class="nav-item" data-tab="whatsapp">
+            <i class="fa-brands fa-whatsapp"></i>
+            <span>الواتساب</span>
+        </button>
+    </div>
+
+    <script>
+        // ===== Helpers =====
+        const KEY_CALC = 'smartflow_calc';
+        const KEY_SALES = 'smartflow_sales';
+        const KEY_TAB = 'smartflow_tab';
+
+        const moneyFormatter = new Intl.NumberFormat('ar-DZ-u-nu-latn', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        function loadStore(key, fallback) {
+            try {
+                const raw = localStorage.getItem(key);
+                return raw ? JSON.parse(raw) : fallback;
+            } catch {
+                return fallback;
+            }
+        }
+
+        function saveStore(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch {
+                // التخزين غير متاح: التطبيق يعمل بالذاكرة فقط
+            }
+        }
+
+        function num(value, fallback = 0) {
+            const n = parseFloat(value);
+            return Number.isFinite(n) ? n : fallback;
+        }
+
+        function money(n) {
+            const safe = Number.isFinite(n) ? n : 0;
+            return moneyFormatter.format(safe) + ' د.ج';
+        }
+
+        function uid() {
+            return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        }
+
+        // ===== Tabs =====
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            const tab = document.getElementById('tab-' + tabId);
+            const nav = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
+            if (tab) tab.classList.add('active');
+            if (nav) nav.classList.add('active');
+            saveStore(KEY_TAB, tabId);
+        }
+
+        // ===== Calculator =====
+        let saleCostTouched = false;
+        let persistTimer = null;
+
+        function scheduleCalcPersist(payload) {
+            clearTimeout(persistTimer);
+            persistTimer = setTimeout(() => saveStore(KEY_CALC, payload), 200);
+        }
+
+        function addIngredientRow(name = '', cost = '') {
+            const list = document.getElementById('ingredients-list');
+            const div = document.createElement('div');
+            div.className = 'item-row';
+
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.placeholder = 'اسم المادة';
+            nameInput.className = 'ing-name';
+            nameInput.value = name;
+            nameInput.addEventListener('input', calculateTotal);
+
+            const costInput = document.createElement('input');
+            costInput.type = 'number';
+            costInput.placeholder = 'التكلفة';
+            costInput.className = 'ing-cost';
+            costInput.min = '0';
+            costInput.step = 'any';
+            costInput.value = cost;
+            costInput.addEventListener('input', calculateTotal);
+
+            const delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.className = 'btn btn-danger';
+            delBtn.setAttribute('aria-label', 'حذف المادة');
+            delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+            delBtn.addEventListener('click', () => {
+                div.remove();
+                calculateTotal();
+            });
+
+            div.append(nameInput, costInput, delBtn);
+            list.appendChild(div);
+        }
+
+        function calculateTotal() {
+            let materials = 0;
+            document.querySelectorAll('.ing-cost').forEach(input => {
+                const v = num(input.value);
+                if (v > 0) materials += v;
+            });
+
+            const extra = Math.max(0, num(document.getElementById('extra-cost').value));
+
+            const marginInput = document.getElementById('profit-margin');
+            const typed = num(marginInput.value, NaN);
+            let margin = Number.isFinite(typed) ? Math.min(Math.max(typed, 0), 99) : 0;
+            if (marginInput.value !== '' && Number.isFinite(typed) && typed !== margin) {
+                marginInput.value = String(margin);
+            }
+
+            const totalCost = materials + extra;
+            const price = totalCost / (1 - margin / 100);
+            const profit = price - totalCost;
+
+            document.getElementById('res-cost').textContent = money(totalCost);
+            document.getElementById('res-profit').textContent = money(profit);
+            document.getElementById('res-price').textContent = money(price);
+            document.getElementById('calc-result').style.display = 'block';
+
+            if (!saleCostTouched) {
+                document.getElementById('sale-cost').value = totalCost ? totalCost.toFixed(2) : '';
+                updateSaleProfitPreview();
+            }
+
+            const ingredients = [];
+            document.querySelectorAll('.item-row').forEach(row => {
+                ingredients.push({
+                    name: row.querySelector('.ing-name').value,
+                    cost: row.querySelector('.ing-cost').value
+                });
+            });
+
+            scheduleCalcPersist({
+                productName: document.getElementById('product-name').value,
+                ingredients,
+                extraCost: extra,
+                margin,
+                totalCost,
+                profit,
+                totalPrice: price
+            });
+        }
+
+        function loadCalc() {
+            const list = document.getElementById('ingredients-list');
+            list.innerHTML = '';
+
+            const saved = loadStore(KEY_CALC, null);
+            if (!saved || typeof saved !== 'object') {
+                addIngredientRow();
+                calculateTotal();
+                return;
+            }
+
+            document.getElementById('product-name').value = saved.productName || '';
+            document.getElementById('extra-cost').value = saved.extraCost ?? 0;
+            document.getElementById('profit-margin').value = saved.margin ?? 20;
+
+            const items = Array.isArray(saved.ingredients) && saved.ingredients.length
+                ? saved.ingredients
+                : [{}];
+            items.forEach(i => addIngredientRow(i.name || '', i.cost || ''));
+
+            calculateTotal();
+        }
+
+        // ===== Sales =====
+        let sales = loadStore(KEY_SALES, []);
+        if (!Array.isArray(sales)) sales = [];
+        let lastDeleted = null;
+
+        function updateSaleProfitPreview() {
+            const amount = num(document.getElementById('sale-amount').value);
+            const cost = num(document.getElementById('sale-cost').value);
+            const profit = amount - cost;
+            const preview = document.getElementById('sale-profit-preview');
+            preview.textContent = 'الربح الصافي: ' + money(profit);
+            preview.style.color = profit < 0 ? 'var(--danger)' : 'var(--text-sub)';
+        }
+
+        function renderSales() {
+            const history = document.getElementById('sales-history');
+            const summary = document.getElementById('sales-summary');
+            history.innerHTML = '';
+            summary.innerHTML = '';
+
+            if (!sales.length) {
+                history.innerHTML = '<div class="empty-msg">لا توجد مبيعات مسجلة بعد.</div>';
+                return;
+            }
+
+            let totalAmount = 0, totalProfit = 0;
+            sales.forEach(sale => {
+                totalAmount += Number(sale.amount) || 0;
+                totalProfit += Number(sale.profit) || 0;
+            });
+
+            [...sales].reverse().forEach(sale => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+
+                const info = document.createElement('div');
+                info.className = 'info';
+
+                const strong = document.createElement('strong');
+                strong.textContent = sale.client;
+
+                const small = document.createElement('small');
+                small.style.color = 'var(--text-sub)';
+                const date = new Date(sale.date);
+                const dateText = isNaN(date) ? '' : ' | ' + date.toLocaleDateString('ar-DZ');
+                small.textContent = `المبلغ: ${money(Number(sale.amount))} | الربح: ${money(Number(sale.profit))}${dateText}`;
+
+                info.append(strong, document.createElement('br'), small);
+
+                const delBtn = document.createElement('button');
+                delBtn.type = 'button';
+                delBtn.className = 'btn btn-danger';
+                delBtn.setAttribute('aria-label', 'حذف البيعة');
+                delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                delBtn.addEventListener('click', () => deleteSale(sale.id));
+
+                item.append(info, delBtn);
+                history.appendChild(item);
+            });
+
+            const box = document.createElement('div');
+            box.className = 'summary-box';
+            box.innerHTML = `
+                <div class="summary-item"><span>عدد العمليات:</span><span>${sales.length}</span></div>
+                <div class="summary-item"><span>إجمالي المبيعات:</span><span>${money(totalAmount)}</span></div>
+                <div class="summary-item total"><span>إجمالي الأرباح:</span><span>${money(totalProfit)}</span></div>
+            `;
+            summary.appendChild(box);
+        }
+
+        function addSale() {
+            const client = document.getElementById('sale-client').value.trim() || 'زبون عام';
+            const amount = num(document.getElementById('sale-amount').value, NaN);
+            const cost = num(document.getElementById('sale-cost').value, 0);
+
+            if (!Number.isFinite(amount) || amount <= 0) {
+                alert('يرجى إدخال سعر بيع صحيح أكبر من صفر');
+                return;
+            }
+            if (cost < 0) {
+                alert('التكلفة لا يمكن أن تكون سالبة');
+                return;
+            }
+
+            sales.push({
+                id: uid(),
+                client,
+                amount,
+                cost,
+                profit: amount - cost,
+                date: new Date().toISOString()
+            });
+            saveStore(KEY_SALES, sales);
+
+            document.getElementById('sale-client').value = '';
+            document.getElementById('sale-amount').value = '';
+            document.getElementById('sale-cost').value = '';
+            saleCostTouched = false;
+
+            updateSaleProfitPreview();
+            renderSales();
+            calculateTotal();
+        }
+
+        function deleteSale(id) {
+            const idx = sales.findIndex(s => s.id === id);
+            if (idx === -1) return;
+            if (!confirm('هل تريد حذف هذه البيعة؟')) return;
+
+            lastDeleted = { sale: sales[idx], index: idx };
+            sales.splice(idx, 1);
+            saveStore(KEY_SALES, sales);
+            renderSales();
+
+            showUndoBanner();
+        }
+
+        function showUndoBanner() {
+            document.querySelectorAll('.undo-banner').forEach(b => b.remove());
+
+            const banner = document.createElement('div');
+            banner.className = 'undo-banner';
+
+            const label = document.createElement('span');
+            label.textContent = 'تم حذف البيعة';
+
+            const undoBtn = document.createElement('button');
+            undoBtn.type = 'button';
+            undoBtn.textContent = 'تراجع';
+            undoBtn.addEventListener('click', () => {
+                if (!lastDeleted) return;
+                sales.splice(lastDeleted.index, 0, lastDeleted.sale);
+                saveStore(KEY_SALES, sales);
+                renderSales();
+                banner.remove();
+                lastDeleted = null;
+            });
+
+            banner.append(label, undoBtn);
+            document.body.appendChild(banner);
+
+            setTimeout(() => {
+                banner.remove();
+                lastDeleted = null;
+            }, 5000);
+        }
+
+        // ===== WhatsApp =====
+        function normalizePhone(raw) {
+            let phone = raw.replace(/\D/g, '');
+            if (!phone) return '';
+            if (phone.startsWith('00')) phone = phone.slice(2);
+            else if (phone.startsWith('0')) phone = '213' + phone.slice(1);
+            return phone;
+        }
+
+        function sendWhatsApp() {
+            const rawNumber = document.getElementById('wa-number').value.trim();
+            const message = document.getElementById('wa-message').value.trim();
+
+            if (!rawNumber) {
+                alert('يرجى إدخال رقم هاتف الزبون أولاً');
+                return;
+            }
+
+            const phone = normalizePhone(rawNumber);
+            if (!/^\d{10,15}$/.test(phone)) {
+                alert('رقم الهاتف غير صحيح (مثال: 213XXXXXXXXX أو 0XXXXXXXXX)');
+                return;
+            }
+
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank', 'noopener');
+        }
+
+        // ===== Backup / Restore =====
+        function exportData() {
+            const data = {
+                version: 2,
+                sales,
+                calc: loadStore(KEY_CALC, null)
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'smartflow_backup.json';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function isValidSale(s) {
+            return s && typeof s.client === 'string'
+                && Number.isFinite(Number(s.amount)) && Number(s.amount) > 0;
+        }
+
+        function importData(event) {
+            const input = event.target;
+            const file = input.files[0];
+            input.value = '';
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                let data;
+                try {
+                    data = JSON.parse(e.target.result);
+                } catch {
+                    alert('ملف غير صالح');
+                    return;
+                }
+
+                if (!data || !Array.isArray(data.sales) || !data.sales.every(isValidSale)) {
+                    alert('ملف غير صالح: بيانات المبيعات غير مكتملة');
+                    return;
+                }
+
+                if (!confirm(`سيتم استبدال ${sales.length} بيعة حالية بـ ${data.sales.length} بيعة من الملف. هل تريد المتابعة؟`)) {
+                    return;
+                }
+
+                sales = data.sales.map(s => {
+                    const amount = Number(s.amount);
+                    const cost = Number(s.cost) || 0;
+                    return {
+                        id: s.id || uid(),
+                        client: s.client,
+                        amount,
+                        cost,
+                        profit: amount - cost,
+                        date: s.date || new Date().toISOString()
+                    };
+                });
+                saveStore(KEY_SALES, sales);
+
+                if (data.calc && typeof data.calc === 'object') {
+                    saveStore(KEY_CALC, data.calc);
+                }
+
+                saleCostTouched = false;
+                loadCalc();
+                renderSales();
+                updateSaleProfitPreview();
+                alert('تم استيراد البيانات بنجاح');
+            };
+            reader.readAsText(file);
+        }
+
+        // ===== PWA: Install Prompt =====
+        let deferredPrompt = null;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const btn = document.getElementById('install-btn');
+            if (btn) btn.style.display = 'flex';
+        });
+
+        document.getElementById('install-btn').addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            try { await deferredPrompt.userChoice; } catch {}
+            deferredPrompt = null;
+            document.getElementById('install-btn').style.display = 'none';
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredPrompt = null;
+            document.getElementById('install-btn').style.display = 'none';
+        });
+
+        // ===== PWA: Service Worker =====
+        function showUpdateBanner(worker) {
+            document.querySelectorAll('.undo-banner[data-kind="update"]').forEach(b => b.remove());
+
+            const banner = document.createElement('div');
+            banner.className = 'undo-banner';
+            banner.dataset.kind = 'update';
+
+            const label = document.createElement('span');
+            label.textContent = 'تحديث جديد متوفر';
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = 'تحديث الآن';
+            btn.addEventListener('click', () => {
+                worker.postMessage({ type: 'SKIP_WAITING' });
+                window.location.reload();
+            });
+
+            banner.append(label, btn);
+            document.body.appendChild(banner);
+        }
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => {
+                        // إذا وُجد عامل ينتظر بالفعل
+                        if (reg.waiting && navigator.serviceWorker.controller) {
+                            showUpdateBanner(reg.waiting);
+                        }
+
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            if (!newWorker) return;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    showUpdateBanner(newWorker);
+                                }
+                            });
+                        });
+                    })
+                    .catch(err => console.warn('[PWA] SW registration failed:', err));
+            });
+
+            // عند تغيّر المتحكم (تحديث فعلي) — أعد التحميل مرة واحدة
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                refreshing = true;
+                window.location.reload();
+            });
+        }
+
+        // ===== Event Wiring =====
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => switchTab(item.dataset.tab));
+        });
+
+        document.getElementById('add-ingredient-btn').addEventListener('click', () => addIngredientRow());
+        document.getElementById('calc-btn').addEventListener('click', calculateTotal);
+        document.getElementById('extra-cost').addEventListener('input', calculateTotal);
+        document.getElementById('profit-margin').addEventListener('input', calculateTotal);
+        document.getElementById('product-name').addEventListener('input', calculateTotal);
+
+        document.getElementById('sale-amount').addEventListener('input', updateSaleProfitPreview);
+        document.getElementById('sale-cost').addEventListener('input', () => {
+            saleCostTouched = true;
+            updateSaleProfitPreview();
+        });
+        document.getElementById('use-calc-cost-btn').addEventListener('click', () => {
+            saleCostTouched = false;
+            const total = loadStore(KEY_CALC, {}).totalCost;
+            document.getElementById('sale-cost').value = Number.isFinite(total) ? total.toFixed(2) : '';
+            updateSaleProfitPreview();
+        });
+        document.getElementById('save-sale-btn').addEventListener('click', addSale);
+
+        document.getElementById('export-btn').addEventListener('click', exportData);
+        document.getElementById('import-btn').addEventListener('click', () =>
+            document.getElementById('import-file').click());
+        document.getElementById('import-file').addEventListener('change', importData);
+
+        document.getElementById('wa-send-btn').addEventListener('click', sendWhatsApp);
+
+        // ===== Initial Load =====
+        loadCalc();
+        renderSales();
+        updateSaleProfitPreview();
+        switchTab(loadStore(KEY_TAB, 'calculator'));
+    </script>
+</body>
+</html>
